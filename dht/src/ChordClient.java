@@ -9,6 +9,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import Hash.Key;
+import Hash.NodeKey;
 
 
 public class ChordClient {
@@ -36,7 +37,7 @@ public class ChordClient {
 		System.out.println(thisIP);
 		System.out.println(thisIP.getHostAddress());
 	
-		thisNode=new AppNode(new Key(processID, thisIP.toString()));
+		thisNode=new AppNode(new NodeKey(processID, thisIP.toString()));
 		System.setProperty("java.rmi.server.hostname", thisIP.getHostAddress());
 
 		
