@@ -27,7 +27,7 @@ public class NodeKey extends Key implements Serializable{
 
 	@Override
 	public boolean equals(Key k) {		
-		return keyValue.equals(k.getByteKey());
+		return keyValue.equals(k.getKeyValue());
 	}
 
 	
@@ -46,8 +46,11 @@ public class NodeKey extends Key implements Serializable{
 		return this.ip;
 	}
 
-	public char[] getPID() {		
-		return this.getPID();
+	public int getPID() {		
+		return this.processID;
+	}
+	public String toString() {
+		return ip+"|"+processID;
 	}
 
 }

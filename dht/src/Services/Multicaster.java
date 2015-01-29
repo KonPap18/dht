@@ -1,3 +1,4 @@
+package Services;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -6,6 +7,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.Arrays;
+
+import DistributedStorageApp.AppNodeSignature;
 
 
 
@@ -23,7 +27,7 @@ public class Multicaster {
         InetAddress group = null;
 
         /*Dummy Request*/
-        byte buff[] = new byte[562];
+        byte buff[] = new byte[300];//changed tjis it was 562
 
 
         /*Outcoming and incoming packet declaration*/
@@ -42,6 +46,7 @@ public class Multicaster {
             group = InetAddress.getByName("230.0.1.5");
 
             querySocket.joinGroup(group);
+            System.out.println("joined multicast group");
             answer = new DatagramPacket(buff, buff.length);
             dummyPacket = new DatagramPacket(buff, buff.length, group, 4400);
 
@@ -69,8 +74,8 @@ public class Multicaster {
         querySocket.send(dummyPacket);
 
         /*Set timeout for server to act accordingly*/
-        listeningSocket.setSoTimeout(2000);
-
+        listeningSocket.setSoTimeout(3000);
+        
         try
         {
             listeningSocket.receive(answer);
@@ -81,7 +86,9 @@ public class Multicaster {
            // Log.addMessage("Found a bootstrap node: " + properties.getPid(), Log.INFORMATION);
             listeningSocket.close();
             querySocket.close();
-
+            if(!(LuckySignature==null)) {
+            	System.out.println("Multicaster says: "+LuckySignature.getProcessID()+" answered");
+            }
             return LuckySignature;
         } catch (java.net.SocketTimeoutException ste)
         {
@@ -93,7 +100,7 @@ public class Multicaster {
         }
         catch(Exception general)
         {
-            System.out.println("Some exc:" + general.getMessage());
+            System.err.println("Some exc:" + general.getMessage());
         }
 
 
@@ -104,10 +111,18 @@ public class Multicaster {
 
 	 private static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException
 	    {
+		// 	System.out.println("received Answer in bytes is: "+Arrays.toString(bytes));
 	       java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(bytes);
 	        java.io.ObjectInputStream ois = new java.io.ObjectInputStream(bais);
 	        java.io.Serializable obj = (Serializable)ois.readObject();
 	        return obj;
+	    }
+	 private static AppNodeSignature toAppNodeSignature(byte[] bytes) throws IOException, ClassNotFoundException
+	    {
+	       java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(bytes);
+	        java.io.ObjectInputStream ois = new java.io.ObjectInputStream(bais);
+	        java.io.Serializable obj = (Serializable)ois.readObject();
+	        return (AppNodeSignature) obj;
 	    }
 }
 	

@@ -20,7 +20,7 @@ public class FilePartKey extends Key {
 
 	@Override
 	public boolean equals(Key k) {		
-		return keyValue.equals(k.getByteKey());
+		return keyValue.equals(k.getKeyValue());
 	}
 
 	@Override

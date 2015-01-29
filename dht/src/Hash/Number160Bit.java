@@ -1,8 +1,11 @@
 package Hash;
 
+import java.io.Serializable;
+import java.util.Arrays;
 
 
-public class Number160Bit {
+
+public class Number160Bit implements Serializable{
 	private final byte[] value;
 	
 	public Number160Bit(byte[] digest) {
@@ -162,7 +165,50 @@ public class Number160Bit {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
-	
-	
+	public String toBinaryString()
+	{
+		String str = "";
+		String temp;
+		boolean eightZeros = true;
+
+		for (byte b : value)
+		{
+			temp = Integer.toBinaryString(b & 0xFF);
+
+
+			while( temp.length() % 8 != 0)
+				temp = "0" + temp;
+
+			str += temp;
+		}
+
+		for(int i = 0; i < 8; i++)
+		{
+			if (str.charAt(i) == '1')
+			{
+				eightZeros = false;
+				break;
+			}
+		}
+
+		if (!eightZeros)
+			return str;
+		else
+			return str.substring(8);
+	}
+
+	public String toBinaryStringWithoutZeros()
+	{
+		String s = this.toBinaryString();
+		int num = 0;
+
+		for (int i = 0; i < s.length(); i++)
+			if (s.charAt(i) == '0')
+				num++;
+
+		return s.substring(num);
+	}
+	public String toString() {
+		return Arrays.toString(value);
+	}
 }

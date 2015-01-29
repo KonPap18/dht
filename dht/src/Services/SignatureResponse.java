@@ -1,7 +1,16 @@
+package Services;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.Arrays;
+
+import DistributedStorageApp.AppNodeSignature;
+
+
 
 
 public class SignatureResponse implements Runnable {
@@ -12,7 +21,7 @@ public class SignatureResponse implements Runnable {
 	
 	
 	public SignatureResponse(AppNodeSignature signatureToResponse) {
-		super();
+		
 		this.signatureToResponse = signatureToResponse;
 	}
 
@@ -23,9 +32,9 @@ public class SignatureResponse implements Runnable {
 		 MulticastSocket listeningSocket = null;
 	     DatagramSocket responseSocket = null;
 	     InetAddress multicastGroup;
-	     signatureToResponse=null;
+	     //signatureToResponse=null;
 	     DatagramPacket reqPacket=null;
-	     byte [] buffer=new byte[30];
+	     byte [] buffer=new byte[205];
 	     
 	     try {
 	    	 listeningSocket=new MulticastSocket(4400);
@@ -37,7 +46,7 @@ public class SignatureResponse implements Runnable {
 	    	 reqPacket=new DatagramPacket(buffer, buffer.length);
 	    	 
 	     }catch(Exception e) {
-	    	 
+	    	 System.out.println("!!Something went wrong in signature response setting!!");
 	    	 
 	     }
 	     
@@ -46,15 +55,31 @@ public class SignatureResponse implements Runnable {
 	    	 
 	    	 try {
 	    		 listeningSocket.receive(reqPacket);
-	    		 buffer=signatureToResponse.getBytes();
+	    		 System.out.println("A new request came from " + reqPacket.getAddress().toString());
+	    		 buffer=getBytes(signatureToResponse);
+	    		// System.out.println("Answer send is: "+Arrays.toString(buffer));
 	    		 signaturePacket=new DatagramPacket(buffer, buffer.length, reqPacket.getAddress(), 6000);
 	    		 responseSocket.send(signaturePacket);
 	    	 }catch(Exception e) {
-	    		 
+		    	 System.out.println("!!-------Something went wrong in signature response thread-------!!");
+		    	 e.printStackTrace(System.err);
+
 	    	 }
 	     }
 	     
 
 	}
+	
+	public static byte[] getBytes(Object obj) throws java.io.IOException
+    {
+        Serializable mySerializableObj = (Serializable) obj;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(mySerializableObj);
+        byte[] bytes = baos.toByteArray();
+       // System.out.println("Byte array length"+bytes.length);
+        
+        return bytes;
 
+    }
 }
