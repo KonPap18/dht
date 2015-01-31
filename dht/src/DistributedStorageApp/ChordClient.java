@@ -8,8 +8,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Properties;
 
-import Hash.Key;
 import Hash.NodeKey;
 import Misc.IPTools;
 import Services.Multicaster;
@@ -45,10 +45,18 @@ public class ChordClient {
 		thisNode=new AppNode(new NodeKey(processID, thisIP.toString()));
 		System.out.println("Node created!");
 		System.out.println("Node's key value: "+thisNode.getNodeKey().getKeyValue().toString());
-		System.setProperty("java.rmi.server.hostname", thisIP.getHostAddress());		
 		
+		Properties prop=System.getProperties();
+		prop.setProperty("java.rmi.server.hostname", thisIP.getHostAddress());
+		System.setProperties(prop);
+		//System.setProperty("java.rmi.server.hostname", thisIP.getHostAddress());		
 		
-		
+		/*
+		 * property for multicasting
+		 */
+		Properties props = System.getProperties();
+		props.setProperty("java.net.preferIPv4Stack","true");
+		System.setProperties(props);
 		
 		/*
 		 *do things to select files to share
@@ -122,7 +130,8 @@ public class ChordClient {
 			//mallon exoume parei to komvo. as grapsoume sto diko mas rmi 
 				try {
 					System.out.println("bind name for NOT bootstrap"+"//" + thisIP.getHostAddress() + ":1099/" + thisSignature.getProcessID());
-				/*to cremove rmi:!!*/	Naming.bind("rmi://" + thisIP.getHostAddress() + ":1099/" + thisSignature.getProcessID(), thisNode);
+			//	/*to cremove rmi:!!*/	Naming.bind("rmi://" + thisIP.getHostAddress() + ":1099/" + thisSignature.getProcessID(), thisNode);
+					Naming.bind(thisSignature.getRmiRecord(), thisNode);
 					System.out.println("Node's service binded.. this is NOT bootstrap");
 				} catch (AlreadyBoundException e) {
 					// TODO Auto-generated catch block

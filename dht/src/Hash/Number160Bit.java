@@ -1,18 +1,27 @@
 package Hash;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 
 
 public class Number160Bit implements Serializable{
 	private final byte[] value;
+	private BigInteger bigIntegerRepresentation;
+	
+	public Number160Bit(BigInteger bI) {
+		// TODO Auto-generated constructor stub
+		this.value=bI.toByteArray();
+		this.bigIntegerRepresentation=bI;
+	}
 	
 	public Number160Bit(byte[] digest) {
 		// TODO Auto-generated constructor stub
 		this.value=digest;
+		bigIntegerRepresentation=new BigInteger(value);
 	}
-	public Number160Bit add(byte[] numToAdd) {
+	/*public Number160Bit add(byte[] numToAdd) {
 		int length;
 		if(this.value.length>numToAdd.length) {
 			length=this.value.length;
@@ -56,11 +65,30 @@ public class Number160Bit implements Serializable{
 		}
 		
 		return new Number160Bit(res);
-	}
+	}*/
+
 	public Number160Bit add(Number160Bit numToAdd) {
 		return this.add(numToAdd.value);
+	}	
+
+	public BigInteger getBigIntegerRepresentation() {
+		return bigIntegerRepresentation;
 	}
-	public Number160Bit subtraction(byte[] secNumber)
+
+	public byte[] getBytes()
+	{
+		byte[] nBigNum = new byte[this.value.length];
+
+		System.arraycopy(this.value, 0, nBigNum, 0, this.value.length);
+
+		return nBigNum;
+		
+	}
+
+	public void setBigIntegerRepresentation(BigInteger bigIntegerRepresentation) {
+		this.bigIntegerRepresentation = bigIntegerRepresentation;
+	}
+	/*public Number160Bit subtraction(byte[] secNumber)
 	{
 		int kratoumeno = 0;
 		int thisLength = this.value.length;
@@ -151,22 +179,13 @@ public class Number160Bit implements Serializable{
 		}
 
 		return new Number160Bit(result);
+	}*/
+	
+	public Number160Bit subtract(Number160Bit sub) {
+		return new Number160Bit(this.bigIntegerRepresentation.subtract(sub.bigIntegerRepresentation));
 	}
-	public byte[] getBytes()
-	{
-		byte[] nBigNum = new byte[this.value.length];
-
-		System.arraycopy(this.value, 0, nBigNum, 0, this.value.length);
-
-		return nBigNum;
-		
-	}
-	public int compareTo(Number160Bit lastBig) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	public String toBinaryString()
-	{
+	
+	public String toBinaryString(){
 		String str = "";
 		String temp;
 		boolean eightZeros = true;
@@ -196,9 +215,7 @@ public class Number160Bit implements Serializable{
 		else
 			return str.substring(8);
 	}
-
-	public String toBinaryStringWithoutZeros()
-	{
+	public String toBinaryStringWithoutZeros(){
 		String s = this.toBinaryString();
 		int num = 0;
 
@@ -208,7 +225,27 @@ public class Number160Bit implements Serializable{
 
 		return s.substring(num);
 	}
+
 	public String toString() {
-		return Arrays.toString(value);
+		return this.bigIntegerRepresentation.toString();
+		//return Arrays.toString(value);
+	}
+	private Number160Bit add(byte[] value2) {
+		// TODO Auto-generated method stub
+		return new Number160Bit(bigIntegerRepresentation.add(new BigInteger(value2)));
+	}
+	
+	public Number160Bit squared() {
+		return new Number160Bit(this.bigIntegerRepresentation.pow(2));
+	}
+
+	public Number160Bit add(BigInteger valueOf) {
+		// TODO Auto-generated method stub
+		return this.add(new Number160Bit(valueOf));
+	}
+	
+	public int compareTo(Number160Bit other) {
+		return this.bigIntegerRepresentation.compareTo(other.bigIntegerRepresentation);
+		
 	}
 }

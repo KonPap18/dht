@@ -1,12 +1,14 @@
 package Hash;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 public class NodeKey extends Key implements Serializable{
 	
 	private final Number160Bit keyValue;
 	private final int processID;
 	private final String ip;
+	private BigInteger bigIntegerRepresentation;
 	
 	public NodeKey(int processID, String ip) {		
 		this.processID=processID;

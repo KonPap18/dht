@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import ChordLib.Chord;
 import File.Filepart;
@@ -21,6 +23,8 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 	 */
 	private static final long serialVersionUID = 5133746177914012364L;
 
+	public static final int FINGERS_ON_NODE = 6;
+
 	private final NodeKey NodeID;
 	private boolean connected = false;
 	private List<NodeKey> fingers;
@@ -28,9 +32,11 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 	private NodeKey successor;
 	private Map<Key, Filepart> entries;
 
+	private ScheduledExecutorService ThreadScheduler;
+
 	public AppNode(NodeKey key) throws RemoteException {
 
-		fingers = new ArrayList(6);
+		fingers = new ArrayList(FINGERS_ON_NODE);
 		NodeID = key;
 		predecessor = null;
 		successor = null;
@@ -107,10 +113,11 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 	@Override
 	public NodeKey find_successor_NodeID(Key nodeID2) throws RemoteException {
 		NodeKey ret=null;
-		//κληση πισω στο ψηορδ
+		//κληση πισω στο chord
 		System.out.println("Node "+ this.getNodeKey().getPID()+" is calling method find successor from chord for node "+nodeID2.toString());
 		try {
 			ret=Chord.find_successor(this, nodeID2).getNodeKey();
+			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -185,7 +192,7 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 	 */
 
 	@Override
-	public Key getPredecessor() {
+	public NodeKey getPredecessor() {
 		return predecessor;
 	}
 
@@ -217,9 +224,12 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 	}
 
 	@Override
-	public void join(AppNodeInt newNode) throws RemoteException {
+	public void join(AppNodeInt entryPointNode) throws RemoteException {
 		System.out.println("Joining..");
-		Chord.join(this, newNode);
+		Chord.join(this, entryPointNode);
+		System.out.println("Finaly this node has successor: "+entryPointNode.getSuccessor().getPID()/*+" and predecessor "+entryPointNode.getPredecessor().getPID()*/ );
+		//ThreadScheduler = Executors.newScheduledThreadPool(3);
+	
 	}
 
 	/*
@@ -275,6 +285,12 @@ public class AppNode extends UnicastRemoteObject implements AppNodeInt {
 		Chord.create(this);
 		// threads must start somewhere here
 
+	}
+
+	@Override
+	public boolean answer() {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

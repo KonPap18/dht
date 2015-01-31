@@ -37,7 +37,7 @@ public interface AppNodeInt extends Remote {
 	public List getFingerList() throws RemoteException;
 
 	// public void setPredecessor(AppNodeInt pr);
-	Key getPredecessor() throws RemoteException;
+	public NodeKey getPredecessor() throws RemoteException;
 
 	void setPredecessor(NodeKey predecessor) throws RemoteException;
 
@@ -52,4 +52,6 @@ public interface AppNodeInt extends Remote {
 	AppNodeInt find_successor(Key nodeID2) throws RemoteException;
 
 	void addFinger(int i, Key successorKey) throws RemoteException;
+
+	public boolean answer() throws RemoteException;
 }

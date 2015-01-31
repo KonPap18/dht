@@ -42,6 +42,7 @@ public class Multicaster {
 
             querySocket = new MulticastSocket(4400);
             querySocket.setLoopbackMode(false);
+            querySocket.setTimeToLive(10);//--------------
             
             group = InetAddress.getByName("230.0.1.5");
 

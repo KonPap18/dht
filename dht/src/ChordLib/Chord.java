@@ -27,12 +27,13 @@ public class Chord implements Remote {
 	 * new chord ring starts with with the specified node
 	 */
 	public static void create(AppNode appNode) {
-		System.out.println("Chord trying to start node "+ appNode.getNodeKey());
+		System.out.println("Chord trying to start node "+ appNode.getNodeKey()+"\n");
 		
 		
 		try {
 			appNode.setConnected(true);
 			appNode.setSuccessor(appNode.getNodeKey());
+			appNode.addFinger(0, appNode.getSuccessor());
 			//o eautos tou
 			appNode.setPredecessor(null);
 		} catch (RemoteException e) {
@@ -70,7 +71,7 @@ public class Chord implements Remote {
 		try {
 			System.out.println("joining node is looking up for "+"rmi:/" + entryPointNode.getNodeKey().getIP() + ":1099/" + String.valueOf(successorKey.getPID()));
 			
-			AppNodeInt n = (AppNode) Naming.lookup("rmi:/" + entryPointNode.getNodeKey().getIP() + ":1099/" + String.valueOf(successorKey.getPID()));
+			AppNodeInt n = (AppNodeInt) Naming.lookup("rmi:/" + entryPointNode.getNodeKey().getIP() + ":1099/" + String.valueOf(successorKey.getPID()));
 			//n ειναι ο successor toy thisnode
 			Chord.notify(thisNode, n);//ελεγχος αν ο επόμενος 
 		} catch (MalformedURLException e) {
@@ -83,11 +84,12 @@ public class Chord implements Remote {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Finally this node i now joined with succesor "+ thisNode.getSuccessor().getPID()+" and predeseccor "+thisNode.getPredecessor().getPID());
 	
 		
 	}
 	public static AppNodeInt find_successor(AppNodeInt askingNode, Key idToSearch) throws MalformedURLException, NotBoundException, RemoteException  {
-		System.out.println("Entered method find successor in chord.Caller is "+askingNode.getNodeKey().getPID());
+		System.out.println("Entered method find successor in chord.Caller is "+askingNode.getNodeKey().getPID()+"\n");
 		AppNodeInt tmpAppNode=find_predecessor(askingNode, idToSearch);
 		//exoume ton proigoumeno.o epomenos tou proigoumenou einai o successor pou psaxnoume
 		NodeKey successorsKey=tmpAppNode.getSuccessor();
@@ -95,6 +97,7 @@ public class Chord implements Remote {
 			System.out.println("find successor is trying to access remote's registry");
 			Registry rmi=LocateRegistry.getRegistry(askingNode.getNodeKey().getIP());
 			System.out.println("find successor gained access to remote's registry");
+			System.out.println("find successor is looking up for "+"rmi:/" + successorsKey.getIP() + ":1099/" + String.valueOf(successorsKey.getPID()));
 			return (AppNodeInt) Naming.lookup("rmi:/" + successorsKey.getIP() + ":1099/" + String.valueOf(successorsKey.getPID()));
 
 		} catch (RemoteException e) {
@@ -108,12 +111,12 @@ public class Chord implements Remote {
 		System.out.println("find predecessor is called ");
 		AppNodeInt succ=null;
 		AppNodeInt asking=askingNode;//pairnoume mia anfora
-		System.out.println("trying to get asking's node rmi");
+		//System.out.println(" find predecessor is trying to get asking's node rmi");
 			//Registry remote=LocateRegistry.getRegistry("rmi://" + asking.getNodeKey().getIP() + ":1099/");
 			NodeKey succKey=askingNode.getSuccessor();
 			try {
 				//mia ka8etos einai arketi gt i ip exei alli mia
-				System.out.println("Looking up for "+"rmi:/" + succKey.getIP() + ":1099/" +String.valueOf(succKey.getPID()) );
+				System.out.println("find predeseccor Looking up for "+"rmi:/" + succKey.getIP() + ":1099/" +String.valueOf(succKey.getPID())+"\n" );
 				succ = (AppNodeInt) Naming.lookup("rmi:/" + succKey.getIP() + ":1099/" +String.valueOf(succKey.getPID()));
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
@@ -128,18 +131,27 @@ public class Chord implements Remote {
 			AppNodeInt current=null;
 			
 			while(!Key.isBetween(idToSearch, asking.getNodeKey(), asking.getSuccessor())) {
+				System.out.println("It is not between askingNode and askingNode's successor");
+				
 				if(!(current==null)) {
+					System.out.println("!current==null");
+					
 					if(current.getNodeKey().equals(asking.getNodeKey())) {
+						
+						System.out.println("current key equals asking key, i am about to break");
 						break;
 					}
+					
 				}
 				current=asking;
 				//pairnoume pinaka daktulwn
 				asking= bestFinger(asking, idToSearch);
+				System.out.println("new asking Node is "+asking.getNodeKey());
 				
 				try {
 					NodeKey k=asking.getSuccessor();
-					succ=(AppNodeInt) Naming.lookup("/" + k.getIP() + ":1099/" + String.valueOf(asking.getSuccessor().getPID()));
+					System.out.println("in while loop, lookin up for: "+"rmi:/" + k.getIP() + ":1099/" + String.valueOf(asking.getSuccessor().getPID()));
+					succ=(AppNodeInt) Naming.lookup("rmi:/" + k.getIP() + ":1099/" + String.valueOf(asking.getSuccessor().getPID()));
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -148,6 +160,8 @@ public class Chord implements Remote {
 					e.printStackTrace();
 				}
 			}
+			System.out.println("find predecessor returns: "+asking.getNodeKey()+"\n");
+			
 			return asking;
 
 			}
@@ -159,6 +173,8 @@ public class Chord implements Remote {
 		// TODO Auto-generated method stub
 		NodeKey finger=null;
 		if(asking.getFingerList().size()==0) {
+			System.out.println("\nfinger list is 0 size");
+			
 			return asking;//can't do anything better
 		}
 		for(int i=(asking.getFingerList().size()-1);i>=0;i--) {
@@ -170,7 +186,7 @@ public class Chord implements Remote {
 			}
 			if(Key.isBetween(idToSearch, finger, asking.getNodeKey())) {
 				try {
-					return (AppNodeInt) Naming.lookup("/" + finger.getIP() + ":1099/" + String.valueOf(finger.getPID()));
+					return (AppNodeInt) Naming.lookup("rmi:/" + finger.getIP() + ":1099/" + String.valueOf(finger.getPID()));
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -39,6 +39,7 @@ public class SignatureResponse implements Runnable {
 	     try {
 	    	 listeningSocket=new MulticastSocket(4400);
 	    	 listeningSocket.setReuseAddress(true);
+	    	 listeningSocket.setTimeToLive(10);//-------------------------
 	    	 responseSocket=new DatagramSocket();//fill later
 	    	 multicastGroup=InetAddress.getByName(("230.0.1.5"));
 	    	 listeningSocket.joinGroup(multicastGroup);
